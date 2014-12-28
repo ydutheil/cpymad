@@ -12,6 +12,7 @@ import os
 import collections
 
 from . import _rpc
+from . import unit
 from . import util
 
 try:
@@ -85,7 +86,7 @@ class MadxCommands(object):
 
     def __call__(self, *args, **kwargs):
         """Create and dispatch a MAD-X command string."""
-        self.__dispatch(util.mad_command(*args, **kwargs))
+        self.__dispatch(util.mad_command(*args, **unit.dict_remove(kwargs)))
 
     def __getattr__(self, name):
         """Return a dispatcher for a specific command."""
@@ -612,7 +613,7 @@ class ElementList(collections.Sequence):
         # extends the accepted range to [-len, len+1], just like for lists:
         if index < 0:
             index += len(self)
-        return self._get_element(self._sequence_name, index)
+        return unit.dict_add(self._get_element(self._sequence_name, index))
 
     def __len__(self):
         """Get number of elements."""
@@ -634,6 +635,7 @@ class ElementList(collections.Sequence):
 
     def at(self, pos):
         """Find the element at specified S position."""
+        pos = unit.remove('at', pos)
         return self._get_element_at(self._sequence_name, pos)
 
 
@@ -657,7 +659,9 @@ class TableProxy(collections.Mapping):
     def __getitem__(self, column):
         """Get the column data."""
         try:
-            return self._libmadx.get_table_column(self._name, column.lower())
+            return unit.add(
+                column,
+                self._libmadx.get_table_column(self._name, column.lower()))
         except ValueError:
             raise KeyError(column)
 
@@ -672,7 +676,7 @@ class TableProxy(collections.Mapping):
     @property
     def summary(self):
         """Get the table summary."""
-        return self._libmadx.get_table_summary(self._name)
+        return unit.dict_add(self._libmadx.get_table_summary(self._name))
 
     def copy(self, columns=None):
         """

@@ -3,6 +3,8 @@ import os
 import sys
 import unittest
 
+from unum.units import m
+
 # utilities
 import _compat
 
@@ -84,7 +86,7 @@ class TestMadx(unittest.TestCase, _compat.TestCase):
         beam = 'beam, ex=1, ey=2, particle=electron, sequence={0};'.format(seq_name)
         self.mad.command(beam)
         initial = dict(alfx=0.5, alfy=1.5,
-                       betx=2.5, bety=3.5)
+                       betx=2.5*m, bety=3.5*m)
         # by explicitly specifying the 'columns' parameter a persistent copy
         # is returned. We check that this copy contains the data we want and
         # that it has a 'summary' attribute:
@@ -98,8 +100,8 @@ class TestMadx(unittest.TestCase, _compat.TestCase):
         self.assertAlmostEqual(twiss['alfy'][0], initial['alfy'])
         self.assertAlmostEqual(twiss['betx'][0], initial['betx'])
         self.assertAlmostEqual(twiss['bety'][0], initial['bety'])
-        self.assertAlmostEqual(twiss.summary['ex'], 1)
-        self.assertAlmostEqual(twiss.summary['ey'], 2)
+        self.assertAlmostEqual(twiss.summary['ex'], 1*m)
+        self.assertAlmostEqual(twiss.summary['ey'], 2*m)
         # Check that keys are all lowercase:
         for k in twiss:
             self.assertEqual(k, k.lower())
@@ -119,7 +121,7 @@ class TestMadx(unittest.TestCase, _compat.TestCase):
         beam = 'beam, ex=1, ey=2, particle=electron, sequence=s1;'
         self.mad.command(beam)
         params = dict(alfx=0.5, alfy=1.5,
-                      betx=2.5, bety=3.5,
+                      betx=2.5*m, bety=3.5*m,
                       columns=['betx', 'bety'],
                       sequence='s1')
         # Compute TWISS on full sequence, then on a sub-range, then again on
@@ -138,7 +140,7 @@ class TestMadx(unittest.TestCase, _compat.TestCase):
         self.assertAlmostEqual(betx_range[0], betx_full1[1]) # dr:2, dr:1
         self.assertAlmostEqual(betx_range[1], betx_full1[2]) # qp:2, qp:1
         self.assertAlmostEqual(betx_range[2], betx_full1[3]) # dr:3, dr:2
-        self.assertNotAlmostEqual(betx_range[3], betx_full1[4]) # sb, qp:2
+        self.assertNotAlmostEqual(betx_range[3]/m, betx_full1[4]/m) # sb, qp:2
 
     # def test_survey(self):
     # def test_aperture(self):
@@ -182,28 +184,28 @@ class TestMadx(unittest.TestCase, _compat.TestCase):
         sb1 = s1['sb:1']
         self.assertLess(idx['qp:1'], idx['qp:2'])
         self.assertLess(idx['qp:2'], idx['sb:1'])
-        self.assertAlmostEqual(qp1['at'], 1)
-        self.assertAlmostEqual(qp2['at'], 3)
-        self.assertAlmostEqual(sb1['at'], 5)
-        self.assertAlmostEqual(qp1['l'], 1)
-        self.assertAlmostEqual(qp2['l'], 1)
-        self.assertAlmostEqual(sb1['l'], 2)
-        self.assertAlmostEqual(float(qp1['k1']), 2)
-        self.assertAlmostEqual(float(qp2['k1']), 2)
-        self.assertAlmostEqual(float(sb1['angle']), 3.14/4)
-        self.assertEqual(str(qp1['k1']).lower(), "qp_k1")
+        self.assertAlmostEqual(qp1['at'], 1*m)
+        self.assertAlmostEqual(qp2['at'], 3*m)
+        self.assertAlmostEqual(sb1['at'], 5*m)
+        self.assertAlmostEqual(qp1['l'], 1*m)
+        self.assertAlmostEqual(qp2['l'], 1*m)
+        self.assertAlmostEqual(sb1['l'], 2*m)
+        self.assertAlmostEqual(qp1['k1'], 2*m**-2)
+        self.assertAlmostEqual(qp2['k1'], 2*m**-2)
+        self.assertAlmostEqual(sb1['angle'], 3.14/4)
+        self.assertEqual(qp1['k1'].expr, "qp_k1")
 
     def test_sequence_get_elements_s2(self):
         s2, idx = self._get_elems('s2')
         qp1 = s2['qp1:1']
         qp2 = s2['qp2:1']
         self.assertLess(idx['qp1:1'], idx['qp2:1'])
-        self.assertAlmostEqual(qp1['at'], 0)
-        self.assertAlmostEqual(qp2['at'], 1)
-        self.assertAlmostEqual(qp1['l'], 1)
-        self.assertAlmostEqual(qp2['l'], 2)
-        self.assertAlmostEqual(float(qp1['k1']), 3)
-        self.assertAlmostEqual(float(qp2['k1']), 2)
+        self.assertAlmostEqual(qp1['at'], 0*m)
+        self.assertAlmostEqual(qp2['at'], 1*m)
+        self.assertAlmostEqual(qp1['l'], 1*m)
+        self.assertAlmostEqual(qp2['l'], 2*m)
+        self.assertAlmostEqual(qp1['k1'], 3*m**-2)
+        self.assertAlmostEqual(qp2['k1'], 2*m**-2)
 
     # def test_sequence_get_expanded_elements(self):
 
@@ -218,9 +220,9 @@ class TestMadx(unittest.TestCase, _compat.TestCase):
         iqp2 = elements.index('qp:2')
         qp1 = elements['qp:1']
         qp2 = elements[iqp2]
-        self.assertAlmostEqual(qp1['at'], 1)
-        self.assertAlmostEqual(qp2['at'], 3)
-        self.assertEqual(iqp2, elements.at(3.1))
+        self.assertAlmostEqual(qp1['at'], 1*m)
+        self.assertAlmostEqual(qp2['at'], 3*m)
+        self.assertEqual(iqp2, elements.at(3.1*m))
 
     def test_sequence_expanded_elements(self):
         beam = 'beam, ex=1, ey=2, particle=electron, sequence=s1;'
@@ -230,9 +232,9 @@ class TestMadx(unittest.TestCase, _compat.TestCase):
         iqp2 = elements.index('qp:2')
         qp1 = elements['qp:1']
         qp2 = elements[iqp2]
-        self.assertAlmostEqual(qp1['at'], 1)
-        self.assertAlmostEqual(qp2['at'], 3)
-        self.assertEqual(iqp2, elements.at(3.1))
+        self.assertAlmostEqual(qp1['at'], 1*m)
+        self.assertAlmostEqual(qp2['at'], 3*m)
+        self.assertEqual(iqp2, elements.at(3.1*m))
 
 if __name__ == '__main__':
     unittest.main()

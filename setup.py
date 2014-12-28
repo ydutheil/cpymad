@@ -130,6 +130,7 @@ setup(
         'setuptools',
         'numpy',
         'PyYAML',
+        'Unum',
     ],
 
     classifiers=[

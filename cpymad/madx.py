@@ -658,6 +658,14 @@ class Sequence(object):
         return self._name
 
     @property
+    def range(self):
+        """
+        Get the currently selected active range as a tuple (start, stop) of
+        element names.
+        """
+        return self._libmadx.get_sequence_range(self._name)
+
+    @property
     def beam(self):
         """Get the beam dictionary associated to the sequence."""
         return self._libmadx.get_sequence_beam(self._name)

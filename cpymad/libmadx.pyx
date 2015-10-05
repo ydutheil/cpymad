@@ -22,7 +22,7 @@ cdef extern from "pyport.h":
     ctypedef int Py_intptr_t
 
 from cpymad.types import Constraint, Expression
-from cpymad.util import name_to_internal, name_from_internal
+from cpymad.util import name_to_internal, name_from_internal, normalize_range_name
 cimport cpymad.clibmadx as clib
 
 
@@ -59,6 +59,7 @@ __all__ = [
     'get_sequence_twiss_table_name',
     'get_sequence_beam',
     'is_sequence_expanded',
+    'get_sequence_range',
 
     # iterate tables
     'table_exists',
@@ -656,6 +657,17 @@ def is_sequence_expanded(sequence_name):
     """
     cdef clib.sequence* seq = _find_sequence(sequence_name)
     return seq.n_nodes > 0
+
+
+def get_sequence_range(sequence_name):
+    """
+    Get currently selected range in the sequence. The range is returned as
+    a tuple (first, last) of element names.
+    """
+    cdef clib.sequence* seq = _find_sequence(sequence_name)
+    return normalize_range_name((
+        name_from_internal(_str(seq.range_start.name) or '_$start'),
+        name_from_internal(_str(seq.range_end.name) or '_$end')))
 
 
 def evaluate(expression):

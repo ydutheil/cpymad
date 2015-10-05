@@ -47,7 +47,7 @@ def name_from_internal(element_name):
     >>> name_from_internal("foo:1")
     foo
     >>> name_from_internal("foo:2")
-    foo:2
+    foo[2]
 
     Element names are stored with a ":d" suffix by MAD-X internally (data in
     node/sequence structs), but users must use the syntax "elem[d]" to access

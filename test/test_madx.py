@@ -207,6 +207,9 @@ class TestMadx(unittest.TestCase, _compat.TestCase):
         elem_idx = dict((el['name'], i) for i, el in enumerate(elems))
         return elems, elem_idx
 
+    def test_sequence_range(self):
+        pass
+
     def test_sequence_get_elements_s1(self):
         s1, idx = self._get_elems('s1')
         qp1 = s1['qp[1]']

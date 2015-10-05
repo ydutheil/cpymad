@@ -118,6 +118,9 @@ cdef extern from "madX/mad_cmd.h":
         int beam_def
         command_parameter_list* par
 
+    struct command_list:
+        pass
+
 cdef extern from "madX/mad_elem.h":
     struct element:
         char[NAME_L] name
@@ -179,17 +182,22 @@ cdef enum:
 
 # Global variables:
 cdef extern from "madX/mad_gvar.h":
+    command* current_twiss      # last issued twiss command
     sequence* current_sequ      # active sequence
     table_list* table_register  # list of all tables
     char_p_array* tmp_p_array   # temporary buffer for splits
     char_array* c_dum           # another temporary buffer
     var_list* variable_list     # globals
     el_list* element_list       # list of global elements
+    command_list* stored_commands
 
 
 # Function declarations:
 cdef extern from "madX/mad_api.h":
     sequence_list *madextern_get_sequence_list()
+
+cdef extern from "madX/mad_cmd.h":
+    command* find_command(char* name, command_list*)
 
 cdef extern from "madX/mad_core.h":
     void madx_start()

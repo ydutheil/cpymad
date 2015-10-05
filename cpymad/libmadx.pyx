@@ -49,6 +49,8 @@ __all__ = [
     'num_globals',
     'get_globals',
 
+    'get_last_twiss_command',
+
     # iterate sequences
     'sequence_exists',
     'get_sequence_names',
@@ -199,6 +201,12 @@ def get_globals():
     Get a list of names of all global variables.
     """
     return _name_list(clib.variable_list.list)
+
+
+def get_last_twiss_command():
+    """Return dict for last issued twiss command."""
+    cdef clib.command* cmd = clib.find_command("twiss", clib.stored_commands)
+    return _parse_command(cmd)
 
 
 def sequence_exists(sequence_name):
